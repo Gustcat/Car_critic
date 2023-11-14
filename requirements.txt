@@ -1,0 +1,4 @@
+Django==3.2.3
+djangorestframework==3.12.4
+djoser==2.2.2
+django-environ==0.10.0
