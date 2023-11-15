@@ -14,7 +14,7 @@ router = DefaultRouter()
 router.register(r'countries', CountryViewSet)
 router.register(r'producers', ProducerViewSet)
 router.register(r'cars', CarViewSet)
-router.register(r'cars/comments',
+router.register(r'cars/(?P<car_id>\d+)/comments',
                 CommentViewSet,
                 basename='comments')
 

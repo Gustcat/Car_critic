@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
 
 from cars.models import (
     Country,
@@ -14,29 +15,31 @@ from .serializers import (
     )
 
 
-class CountryViewSet(viewsets.ViewSet):
+class CountryViewSet(viewsets.ModelViewSet):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
 
 
-class ProducerViewSet(viewsets.ViewSet):
+class ProducerViewSet(viewsets.ModelViewSet):
     serializer_class = ProducerSerializer
     queryset = Producer.objects.all()
 
 
-class CarViewSet(viewsets.ViewSet):
+class CarViewSet(viewsets.ModelViewSet):
     serializer_class = CarSerializer
     queryset = Car.objects.all()
 
 
-class CommentViewSet(viewsets.ViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        return Car.comments.all()
+        car_id = self.kwargs.get('car_id')
+        car = get_object_or_404(Car, id=car_id)
+        return car.comments.all()
 
-    def perform_create(self, serializer):
-        if self.request.user.is_authenticated:
-            serializer.save(email=self.request.user.email)
-        else:
-            serializer.save()
+    # def perform_create(self, serializer):
+    #     if self.request.user.is_authenticated:
+    #         serializer.save(email=self.request.user.email)
+    #     else:
+    #         serializer.save()

@@ -55,7 +55,7 @@ class CarSerializer(serializers.ModelSerializer):
         fields = ('name', 'producer', 'inception_year',
                   'completion_year', 'comments', 'comment_amount')
 
-    def get_producers(self, obj):
+    def get_comments(self, obj):
         return [comment.comment for comment in obj.comments.all()]
 
     def get_comment_amount(self, obj):
@@ -67,10 +67,17 @@ class CommentSerializer(serializers.ModelSerializer):
         slug_field='name',
         queryset=Car.objects.all()
     )
+    email = serializers.EmailField(required=False, default=serializers.CurrentUserDefault())
 
+    def validate_email(self, value):
+        if not self.context['request'].user.is_anonymous:
+            value = self.context['request'].user.email
+        elif value.username == '':
+            raise serializers.ValidationError('Для анонимных пользователей'
+                                              ' указание электронной почты'
+                                              ' обязательно!')
+        return value
 
     class Meta:
         model = Comment
         fields = 'email', 'car', 'comment'
-
-

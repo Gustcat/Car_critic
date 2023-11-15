@@ -59,11 +59,6 @@ class Car(models.Model):
                     MaxValueValidator(2100)],
         verbose_name='Год начала выпуска',
     )
-    inception_year = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1900),
-                    MaxValueValidator(2100)],
-        verbose_name='Год начала выпуска',
-    )
     completion_year = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1900),
                     MaxValueValidator(2100)],
@@ -83,7 +78,7 @@ class Car(models.Model):
 class Comment(models.Model):
     email = models.EmailField(
         max_length=25,
-        verbose_name='Электронная почта'
+        verbose_name='Электронная почта',
     )
     car = models.ForeignKey(
         Car,
@@ -104,4 +99,4 @@ class Comment(models.Model):
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.name
+        return f'{self.email}: {self.comment[:25]}'
