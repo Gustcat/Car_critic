@@ -5,7 +5,6 @@ from cars.models import (
     Country,
     Producer,
     Car,
-    Comment,
     )
 from .serializers import (
     CountrySerializer,
@@ -13,33 +12,46 @@ from .serializers import (
     ProducerSerializer,
     CommentSerializer,
     )
+from .permissions import (
+    AuthenticatedOrReadOnly,
+    AuthorOrCreateOrReadOnly
+)
+from .utilities import load_xlsx, load_csv
 
 
-class CountryViewSet(viewsets.ModelViewSet):
+class ListDownloadViewSet(viewsets.ModelViewSet):
+
+    def list(self, request, *args, **kwargs):
+        result = super().list(request)
+        if request.GET.get('format') == 'xlsx':
+            return load_xlsx(result.data)
+        elif request.GET.get('format') == 'csv':
+            return load_csv(result.data)
+        return result
+
+
+class CountryViewSet(ListDownloadViewSet):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
+    permission_classes = [AuthenticatedOrReadOnly]
 
 
-class ProducerViewSet(viewsets.ModelViewSet):
+class ProducerViewSet(ListDownloadViewSet):
     serializer_class = ProducerSerializer
     queryset = Producer.objects.all()
+    permission_classes = [AuthenticatedOrReadOnly]
 
 
-class CarViewSet(viewsets.ModelViewSet):
+class CarViewSet(ListDownloadViewSet):
     serializer_class = CarSerializer
     queryset = Car.objects.all()
+    permission_classes = [AuthenticatedOrReadOnly]
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ListDownloadViewSet):
     serializer_class = CommentSerializer
+    permission_classes = [AuthorOrCreateOrReadOnly]
 
     def get_queryset(self):
-        car_id = self.kwargs.get('car_id')
-        car = get_object_or_404(Car, id=car_id)
+        car = get_object_or_404(Car, id=self.kwargs.get('car_id'))
         return car.comments.all()
-
-    # def perform_create(self, serializer):
-    #     if self.request.user.is_authenticated:
-    #         serializer.save(email=self.request.user.email)
-    #     else:
-    #         serializer.save()
